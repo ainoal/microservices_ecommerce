@@ -1,5 +1,7 @@
 /* The product catalog microservice takes care of the product catalog.
 */
+const express = require("express");
+const bodyParser = require("body-parser");
 
 class Product {
     constructor(productID, name, category, price, quantity) {
@@ -89,8 +91,6 @@ class ProductCatalogService {
 }
 
 // RESTful API
-const express = require("express");
-const bodyParser = require("body-parser");
 const app = express();
 const port = 8000;
 
@@ -103,9 +103,9 @@ const productCatalog = new ProductCatalogService();
 app.get("/products/:ID", (req, res) => {
     const product = productCatalog.getProduct(req.params.ID);
     if (product) {
-        res.send(product);
+        res.send((JSON.stringify(product)));
     } else {
-        res.status(404).send(`Product ${req.params.ID} not found on catalog`);
+        res.status(404).send(JSON.stringify(`Product ${req.params.ID} not found on catalog`));
     }
 });
 

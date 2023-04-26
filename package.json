@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/ainoal/microservices_ecommerce#readme",
   "dependencies": {
+    "node-fetch": "^2.6.5",
     "node-sass": "^8.0.0"
   }
 }
