@@ -20,6 +20,10 @@ class ProductCatalogService {
         return this.products.find((product) => product.productID == ID);
     }
 
+    getAllProducts() {
+        return this.products;
+    }
+
     // Create a new type of a product in the product catalog
     createProduct(ID, name, category, price, quantity) {
         const product = new Product(ID, name, category, price, quantity);
@@ -105,6 +109,12 @@ app.get("/products/:ID", (req, res) => {
     }
 });
 
+// Get all products
+app.get("/products", (req, res) => {
+    let products = productCatalog.getAllProducts();
+    res.send(products);
+});
+
 // Create a new product
 app.post("/products", (req, res) => {
     productCatalog.createProduct(req.body.ID, req.body.name, req.body.category,
@@ -126,12 +136,16 @@ app.put("/products/:ID", (req, res) => {
 });
 
 // Update stock
-app.put("/products/:ID", (req, res) => {
-    productCatalog.updateStock(req.params.ID, req.params.change);
+app.put("/products/:stock", (req, res) => {
+    productCatalog.updateStock(req.body.ID, req.body.change);
     res.send("Stock updated");
 });
 
 // Filter by category and price range
+app.get("/products/:filter", (req, res) => {
+    let filteredProductsList = productCatalog.filter(req.body.category, req.body.maxPrice);
+    res.send(filteredProductsList);
+});
 
 // Listen for incoming requests
 app.listen(port, () => {
