@@ -1,0 +1,22 @@
+{
+  "name": "finalproject",
+  "version": "1.0.0",
+  "description": "DistributesSys",
+  "main": "index.js",
+  "scripts": {
+    "sass": "node-sass -w scss/ -o css/ --recursive"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ainoal/microservices_ecommerce.git"
+  },
+  "author": "ainoal",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ainoal/microservices_ecommerce/issues"
+  },
+  "homepage": "https://github.com/ainoal/microservices_ecommerce#readme",
+  "dependencies": {
+    "node-sass": "^8.0.0"
+  }
+}
