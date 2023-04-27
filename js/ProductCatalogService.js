@@ -2,16 +2,8 @@
 */
 const express = require("express");
 const bodyParser = require("body-parser");
+const Product = require("./Product");
 
-class Product {
-    constructor(productID, name, category, price, quantity) {
-        this.productID = productID;
-        this.name = name;
-        this.category = category;
-        this.price = parseFloat(price);
-        this.quantity = parseInt(quantity);
-    }
-}
 
 class ProductCatalogService {
     constructor() {
