@@ -148,9 +148,13 @@ app.get("/products/:filter", (req, res) => {
 });
 
 // Listen for incoming requests
-app.listen(port, () => {
-    console.log(`Product catalog microservice listening on port ${port}`);
-});
+try {
+    app.listen(port, () => {
+        console.log(`Product catalog microservice listening on port ${port}`);
+    });
+} catch (error) {
+    console.error(`${error}`);
+}
 
 /*********************** FOR TESTING ********************************/
 productCatalog.createProduct("1", "teddy bear", "toys", 14.5, 3);
