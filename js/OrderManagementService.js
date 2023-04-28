@@ -1,6 +1,9 @@
 /*
 */
 
+// GraphQL server and client reference:
+// https://github.com/reymon359/graphql-hello-world-server
+
 /**** FOR TESTING ******/
 class Cart {
     constructor(cartID) {
@@ -12,11 +15,14 @@ class Cart {
 const cart1 = new Cart(1);
 /***********************/
 
-import { createYoga } from "graphql-yoga";
+/*import { createYoga } from "graphql-yoga";
 import { createServer } from 'http';
 import { PubSub } from "graphql-subscriptions";
 import Order from "./Order.js";
-const pubSub = new PubSub();
+const pubSub = new PubSub();*/
+const {ApolloServer, gql} = require('apollo-server'); 
+const Order= require("./Order");
+
 
 class OrderManagementService {
     constructor() {    // maybe also authorization?
@@ -52,11 +58,21 @@ class OrderManagementService {
 
 const orderManagementService = new OrderManagementService;
 
+const typeDefs = gql`
+  schema {
+    query: Query
+  }
+
+  type Query {
+    greeting: String
+  }
+`;
+
 // Resolvers: https://www.apollographql.com/docs/apollo-server/data/resolvers/
 // https://www.apollographql.com/tutorials/fullstack-quickstart/04-writing-query-resolvers
 // https://www.apollographql.com/tutorials/fullstack-quickstart/05-writing-mutation-resolvers
 // https://www.apollographql.com/docs/apollo-server/data/subscriptions/
-const resolvers = {
+/*const resolvers = {
     Query: {
         trackOrder: (parent, { orderID }) => {
             return orderManagementService.trackOrder(orderID);
@@ -83,12 +99,23 @@ const resolvers = {
             subscribe: () => pubSub.asyncIterator("order_updated"),
         }
     }
-}
+}*/
 
-const yoga = createYoga( { resolvers } );
-const server = createServer();
+// Resolver function to return the data. 
+// It has to match our type definitions
+const resolvers = {
+    Query: {
+      greeting: () => 'Hello GraphQL world!👋'
+    }
+  }
 
-server.listen(4000, () => console.log("Order Management Microservice listening on port 4000"));
+/*const yoga = createYoga( { resolvers } );
+const server = createServer();*/
+
+const server = new ApolloServer({typeDefs, resolvers});
+server.listen({port: 9000})
+  .then(({url}) => console.log(`Order Management Microservice running at ${url}`));
+
 
 /* CHECKLIST:
  * When Order management publishes a change in order (order placed)
@@ -102,9 +129,9 @@ server.listen(4000, () => console.log("Order Management Microservice listening o
 */
 
 /************** FOR TESTING ********************/
-setTimeout(() => {
+/*setTimeout(() => {
     console.log('Waited 30 seconds');
-  }, 30000);
-let order = orderManagementService.createOrder(cart1);
-console.log(order);
+    let order = orderManagementService.createOrder(cart1);
+    console.log(order);
+  }, 30000);*/
 
