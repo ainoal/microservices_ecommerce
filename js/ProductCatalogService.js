@@ -2,8 +2,78 @@
 */
 const express = require("express");
 const bodyParser = require("body-parser");
+
 const Product = require("./Product");
 
+/*const { ApolloClient, InMemoryCache, gql } = require("@apollo/client");
+const { WebSocketLink } = require("apollo-link-ws");
+const { SubscriptionClient } = require("subscriptions-transport-ws");
+const ws = require("ws");
+
+const link = new SubscriptionClient("ws://localhost:4000", {
+    reconnect: true,
+    webSocketImpl: ws
+});*/
+
+const { request } = require("graphql-request");
+const { SubscriptionClient } = require("graphql-ws");
+
+const graphql_conn = "http://localhost:4000/graphql";
+const ws_conn = "ws://localhost:4000/graphql";
+
+/*const subscriptionClient = new SubscriptionClient(ws_conn, {
+  reconnect: true,
+});*/
+
+const query = `
+  subscription {
+    orderCreated {
+      orderID
+      cart
+      status
+    }
+  }
+`;
+
+request(graphql_conn, query).then((data) => console.log(data));
+
+/*const fetch = require('node-fetch')
+const { createHttpLink } = require('apollo-link-http')
+const { InMemoryCache } = require('apollo-cache-inmemory')
+const { ApolloClient } = require('apollo-client')
+const gql = require('graphql-tag')
+
+const httpLink = createHttpLink({
+  uri: "http://localhost:4000/graphql",
+  fetch: fetch
+})
+
+const client = new ApolloClient({
+  link: httpLink,
+  cache: new InMemoryCache()
+})
+
+const query = gql`
+  query {
+    viewer {
+      login
+    }
+  }
+`
+
+client.query({
+  query
+}).catch((error) => {
+  console.log(error)
+  done()
+})*/
+
+/*const subscription = subscriptionClient.request({ query });
+subscription.subscribe({
+    next: ({ data }) => console.log(data.orderCreated),
+    error: (err) => console.error(err),
+    complete: () => console.log("Subscription finished"),
+  });*/
 
 class ProductCatalogService {
     constructor() {

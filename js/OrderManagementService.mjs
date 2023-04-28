@@ -1,6 +1,17 @@
 /*
 */
 
+/**** FOR TESTING ******/
+class Cart {
+    constructor(cartID) {
+        this.cartID = cartID;
+        this.items = [];
+        this.quantityInCart = [];
+    }
+}
+const cart1 = new Cart(1);
+/***********************/
+
 import { createYoga } from "graphql-yoga";
 import { createServer } from 'http';
 import { PubSub } from "graphql-subscriptions";
@@ -39,22 +50,24 @@ class OrderManagementService {
     }
 }
 
+const orderManagementService = new OrderManagementService;
+
 // Resolvers: https://www.apollographql.com/docs/apollo-server/data/resolvers/
 // https://www.apollographql.com/tutorials/fullstack-quickstart/04-writing-query-resolvers
 // https://www.apollographql.com/tutorials/fullstack-quickstart/05-writing-mutation-resolvers
 // https://www.apollographql.com/docs/apollo-server/data/subscriptions/
 const resolvers = {
     Query: {
-        trackOrder: (parent, { orderID }, {orderManagementService}) => {
+        trackOrder: (parent, { orderID }) => {
             return orderManagementService.trackOrder(orderID);
         }
     },
     Mutation: {
-        createOrder: (parent, { orderID, newStatus }, {orderManagementService}) => {
+        createOrder: (parent, { cart }) => {
             orderManagementService.createOrder(cart);
             return 0;
         },
-        updateOrder: (parent, { orderID, newStatus }, {orderManagementService}) => {
+        updateOrder: (parent, { orderID, newStatus }) => {
             orderManagementService.updateOrder(orderID, newStatus);
             return 0;
         }
@@ -87,3 +100,11 @@ server.listen(4000, () => console.log("Order Management Microservice listening o
  * When any change in an order
  * -> auth service gets notified
 */
+
+/************** FOR TESTING ********************/
+setTimeout(() => {
+    console.log('Waited 30 seconds');
+  }, 30000);
+let order = orderManagementService.createOrder(cart1);
+console.log(order);
+
