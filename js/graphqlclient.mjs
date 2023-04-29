@@ -93,9 +93,9 @@ function subscribeToOrderCreated() {
 
       const { data, headers } = response;
       lastEventId = headers['last-event-id'];
-      //if (data.orderCreated != null) {
+      if (data.orderCreated != null) {
         console.log('Order created:', data);
-      //}
+      }
 
       getNextEvent();
     } catch (error) {

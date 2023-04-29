@@ -19,6 +19,10 @@ const { ApolloServer, gql } = require('apollo-server');
 const amqp = require('amqplib');
 const Order = require("./Order");
 
+const { executeSchema } = require('graphql');
+const { PubSub } = require('graphql-subscriptions');
+const pubsub = new PubSub({ executeSchema });
+
 class OrderManagementService {
   constructor() {
     this.orders = [];
