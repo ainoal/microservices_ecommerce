@@ -1,9 +1,3 @@
-/*
-*/
-
-// GraphQL server and client reference:
-// https://github.com/reymon359/graphql-hello-world-server
-
 /**** FOR TESTING ******/
 class Cart {
     constructor(cartID) {
@@ -12,161 +6,91 @@ class Cart {
         this.quantityInCart = [];
     }
 }
-
 /***********************/
 
-const { ApolloServer, gql } = require('apollo-server');
+const express = require("express");
+const bodyParser = require("body-parser");
 const amqp = require('amqplib');
 const Order = require("./Order");
 
-const { executeSchema } = require('graphql');
-const { PubSub } = require('graphql-subscriptions');
-const pubsub = new PubSub({ executeSchema });
-
 class OrderManagementService {
-  constructor() {
-    this.orders = [];
-  }
+    constructor() {    // maybe also authorization?
+        this.orders = [];
 
-  trackOrder(orderID) {
-    return "Success";
-  }
-
-  async createOrder(cart) {
-    const orderID = this.orders.length + 1;
-    const order = new Order(orderID, cart, "order_created");
-    this.orders.push(order);
-
-    const message = JSON.stringify(order);
-    const connection = await amqp.connect('amqp://localhost');
-    const channel = await connection.createChannel();
-    await channel.assertQueue('order_created');
-    channel.sendToQueue('order_created', Buffer.from(message));
-
-    return order;
-  }
-
-  async updateOrder(orderID, newStatus) {
-    const order = this.orders.find((order) => order.orderID == orderID);
-    if (!order) {
-      console.log(`Order ${orderID} not found!`);
-    } else {
-      order.status = newStatus;
-      const message = JSON.stringify(order);
-      const connection = await amqp.connect('amqp://localhost');
-      const channel = await connection.createChannel();
-      await channel.assertQueue(newStatus === "cancelled" ? 'order_cancelled' : 'order_updated');
-      channel.sendToQueue(newStatus === "cancelled" ? 'order_cancelled' : 'order_updated', Buffer.from(message));
+        // Connect to the AMQP server and create a channel for publish-subscribe
+        // communication
+        this.connection = amqp.connect('amqp://localhost').then(connection => {
+            console.log("here");
+            return connection.createChannel().then(channel => {
+                this.channel = channel;
+                const exchange = 'order_created';
+                return channel.assertExchange(exchange, 'fanout', { durable: false });
+            });
+        }).then(() => {
+            console.log("here2");
+            return this;
+        });
     }
-  }
 
-  helloWorld() {
-    return "Hello GraphQL World!";
-  }
+
+    trackOrder(orderID) {
+        const order = this.orders.find((order) => order.orderID == orderID);
+        return order ? order : null;
+    }
+
+    createOrder(cart) {     // TODO: Also "owner" later when authorization service is implemented
+        const orderID = this.orders.length + 1;
+        const exchange = 'order_created';
+        const order = new Order(orderID, cart, "Created");
+        this.orders.push(order);
+        const message = JSON.stringify(order);
+        return new Promise((resolve, reject) => {
+            console.log("here5");
+            this.channel.publish(exchange, '', Buffer.from(message), (error) => {
+            if (error) {
+                console.log("hereerror");
+                reject(error);
+            } else {
+                console.log("hereresolve");
+                resolve(order);
+            }
+            });
+        });
+    }
+
+    updateOrder(orderID, newStatus) {
+        const order = this.orders.find((order) => order.orderID == orderID);
+        if (!order) {
+            console.log(`Order ${orderID} not found!`);
+        } else {
+            order.status = newStatus;
+            if (newStatus == "cancelled") {
+                this.channel.publish("order_cancelled", { orderCancelled: order });
+            } else {
+                this.channel.publish("order_updated", { orderUpdated: order });
+            }
+        }
+    }
 }
 
-const orderManagementService = new OrderManagementService;
+// RESTful API
+const app = express();
+const port = 8000;
 
-const typeDefs = gql`
-  schema {
-    query: Query
-    mutation: Mutation
-    subscription: Subscription
-  }
+// Parse incoming requests
+app.use(bodyParser.json());
 
-  type Order {
-    orderID: ID!
-    status: String!
-    cart: String!
-  }
+var orderManagement = new OrderManagementService();
 
-  type Query {
-    trackOrder(orderID: ID!): String!
-    greeting: String
-  }
-
-  type Mutation {
-    createOrder(cart: String!): Order
-    updateOrder(orderID: ID!, newStatus: String!): Int
-  }
-
-  type Subscription {
-    orderCreated: Order
-    orderCancelled: Order
-    orderUpdated: Order
-  }
-`;
-
-const resolvers = {
-  Query: {
-    trackOrder: (orderID) => {
-      return orderManagementService.trackOrder(orderID);
-    },
-    greeting: () => {
-      return orderManagementService.helloWorld();
+app.get("/orders/:ID", (req, res) => {
+    const orderTracked = orderManagement.trackOrder(req.params.ID);
+    if (orderTracked) {
+        res.send((JSON.stringify(orderTracked.status)));
+    } else {
+        res.status(404).send(JSON.stringify("Invalid order number"));
     }
-  },
+});
 
-  Mutation: {
-    createOrder: async (parent, { cart }) => {
-      const order = await orderManagementService.createOrder(cart);
-      return order;
-    },
-    updateOrder: async (parent, { orderID, newStatus }) => {
-      const result = await orderManagementService.updateOrder(orderID, newStatus);
-      return result;
-    }
-  },
-  
-
-  Subscription: {
-    orderCreated: {
-        subscribe: async (parent, args, { connection }) => {
-          const channel = await connection.createChannel();
-          await channel.assertQueue('order_created');
-          await channel.consume('order_created', (message) => {
-            const order = JSON.parse(message.content.toString());
-            connection._subscriptions.forEach((sub) => {
-              sub.next(order);
-            });
-          }, { noAck: true });
-          return connection._subscriptions[connection._subscriptions.length - 1].asyncIterator();
-        }
-      },
-      orderCancelled: {
-        subscribe: async (parent, args, { connection }) => {
-          const channel = await connection.createChannel();
-          await channel.assertQueue('order_cancelled');
-          await channel.consume('order_cancelled', (message) => {
-            const order = JSON.parse(message.content.toString());
-            connection._subscriptions.forEach((sub) => {
-              sub.next(order);
-            });
-          }, { noAck: true });
-          return connection._subscriptions[connection._subscriptions.length - 1].asyncIterator();
-        }
-      },
-      orderUpdated: {
-        subscribe: async (parent, args, { connection }) => {
-          const channel = await connection.createChannel();
-          await channel.assertQueue('order_updated');
-          await channel.consume('order_updated', (message) => {
-            const order = JSON.parse(message.content.toString());
-            connection._subscriptions.forEach((sub) => {
-              sub.next(order);
-            });
-          }, { noAck: true });
-          return connection._subscriptions[connection._subscriptions.length - 1].asyncIterator();
-        }
-      },
-    }
-  };
-
-  const server = new ApolloServer({typeDefs, resolvers});
-  server.listen({port: 9000})
-    .then(({url}) => console.log(`Order Management Microservice running at ${url}`));
-  
-  
   /* CHECKLIST:
    * When Order management publishes a change in order (order placed)
    * -> product catalog gets notification
@@ -179,10 +103,24 @@ const resolvers = {
   */
   
   /************** FOR TESTING ********************/
-  setTimeout(() => {
-      console.log('Waited 10 seconds');
-      const cart1 = new Cart(1);
-      orderManagementService.createOrder(cart1).then((order) => {
+/*setTimeout(() => {
+    console.log('Waited 10 seconds');
+    const cart1 = new Cart(1);
+    orderManagement.createOrder(cart1).then((order) => {
         console.log(order);
-      });
-    }, 10000);
+    });
+}, 10000);*/
+
+console.log("here3");
+orderManagement.connection.then(() => {
+    console.log("here4");
+    const cart1 = new Cart(1);
+    orderManagement.createOrder(cart1).then((order) => {
+        console.log(order);
+    });
+}).catch((err) => {
+    console.error(err);
+});
+  
+
+
