@@ -1,5 +1,5 @@
 class Order {
-    constructor(orderID, cart, owner, status) {
+    constructor(orderID, cart, status) {
         this.OrderID = orderID;
         this.cart = cart;
         //this.owner = owner;

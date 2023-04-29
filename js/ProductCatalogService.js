@@ -5,9 +5,7 @@ const bodyParser = require("body-parser");
 
 const Product = require("./Product");
 
-
-// TODO: Maybe move this to the end for clarity (??)*/
-const GRAPHQL_URL = 'http://localhost:9000/';
+/*const GRAPHQL_URL = 'http://localhost:9000/';
 
 async function fetchGreeting() {
 	const response = await fetch(GRAPHQL_URL, {
@@ -29,9 +27,9 @@ async function fetchGreeting() {
 }
 
 fetchGreeting().then(({ greeting }) => {
-  const title = document.querySelector('h2');
+  const title = document.querySelector('h1');
   title.textContent = greeting;
-});
+});*/
 
 class ProductCatalogService {
     constructor() {
@@ -43,6 +41,7 @@ class ProductCatalogService {
     }
 
     getAllProducts() {
+        console.log("SUCCESS");
         return this.products;
     }
 
@@ -117,7 +116,7 @@ const port = 8000;
 // Parse incoming requests
 app.use(bodyParser.json());
 
-const productCatalog = new ProductCatalogService();
+var productCatalog = new ProductCatalogService();
 
 // Get a specific product
 app.get("/products/:ID", (req, res) => {
@@ -210,3 +209,4 @@ for (let i = 0; i < filteredList4.length; i++) {
 productCatalog.updateProduct("1", "best teddy bear", "-", "-", "-");
 let teddy = productCatalog.getProduct("1");
 console.log(`Pruduct name: ${teddy.name}`);
+
