@@ -15,11 +15,6 @@ class Cart {
 const cart1 = new Cart(1);
 /***********************/
 
-/*import { createYoga } from "graphql-yoga";
-import { createServer } from 'http';
-import { PubSub } from "graphql-subscriptions";
-import Order from "./Order.js";
-const pubSub = new PubSub();*/
 const {ApolloServer, gql} = require('apollo-server'); 
 const Order= require("./Order");
 
@@ -58,9 +53,37 @@ class OrderManagementService {
 
 const orderManagementService = new OrderManagementService;
 
+
+// TODO: change cart: String! --> cart: Cart and define cart type
+
+// Matching type definitions and resolvers 
 const typeDefs = gql`
   schema {
     query: Query
+    mutation: Mutation
+    subscription: Subscription
+  }
+
+  type Order {
+    orderID: ID!
+    status: String!
+    cart: String! 
+  }
+
+  type Query {
+    trackOrder(orderID: ID!): Order
+    greeting: String
+  }
+
+  type Mutation {
+    createOrder(cart: String!): Order
+    updateOrder(orderID:ID!, newStatus: String!): Int
+  }
+
+  type Subscription {
+    orderCreated: Order
+    orderCancelled: Order
+    orderUpdated: Order
   }
 
   type Query {
@@ -72,11 +95,14 @@ const typeDefs = gql`
 // https://www.apollographql.com/tutorials/fullstack-quickstart/04-writing-query-resolvers
 // https://www.apollographql.com/tutorials/fullstack-quickstart/05-writing-mutation-resolvers
 // https://www.apollographql.com/docs/apollo-server/data/subscriptions/
-/*const resolvers = {
+const resolvers = {
     Query: {
         trackOrder: (parent, { orderID }) => {
             return orderManagementService.trackOrder(orderID);
-        }
+        },
+
+        greeting: () => 'Hello GraphQL world!'
+
     },
     Mutation: {
         createOrder: (parent, { cart }) => {
@@ -99,18 +125,8 @@ const typeDefs = gql`
             subscribe: () => pubSub.asyncIterator("order_updated"),
         }
     }
-}*/
+}
 
-// Resolver function to return the data. 
-// It has to match our type definitions
-const resolvers = {
-    Query: {
-      greeting: () => 'Hello GraphQL world!👋'
-    }
-  }
-
-/*const yoga = createYoga( { resolvers } );
-const server = createServer();*/
 
 const server = new ApolloServer({typeDefs, resolvers});
 server.listen({port: 9000})
