@@ -1,0 +1,103 @@
+// Responsive design
+// Wide screens
+@include mediaXl {
+    .carousel-container {
+        position: relative;
+        margin-left: 50vh;
+        margin-right: 50vh;
+    }
+
+    .btn-left {
+        left: 50vh;
+        transform: translateX(-100%)translateY(-50%);
+    }
+    
+    .btn-right {
+        right: 50vh;
+        transform: translateX(100%)translateY(-50%);
+    }
+
+    .portrait {
+        img {
+            right: 25%;
+            width: 300px;
+            height: 300px;
+        }
+    }
+}
+
+// Desktops and laptops
+@include mediaLg {  
+    .carousel-container {
+        position: relative;
+        margin-left: 25vh;
+        margin-right: 25vh;
+    } 
+
+    .btn-left {
+        left: 25vh;
+        transform: translateX(-100%)translateY(-50%);
+    }
+    
+    .btn-right {
+        right: 25vh;
+        transform: translateX(100%)translateY(-50%);
+    }
+}
+
+// Tablets and small laptops
+@include mediaMd {
+
+    .menu {
+        width: 50%;
+    }
+
+    .about-info {
+        grid-template-areas: 
+            "bioimage"
+            "bio"
+            "skill1"
+            "skill2"
+            "skill3";
+    grid-template-columns: 1fr;
+    }
+
+    .portrait {
+        img {
+            top: 20vh;
+        }
+    }
+}
+
+// Smartphones
+@include mediaSm {
+    main {
+        margin: 2vh;
+        text-align: center;
+        margin-bottom: 70px;
+    }
+
+    .menu {
+        width: 100%;
+    }
+
+    .home-img {
+        img {
+            opacity: 0;
+        }
+    }
+
+    .portrait {
+        img {
+            top: 150px;
+        }
+    }
+
+    main#home h1 {
+        margin-top: 10vh;
+    }
+
+    .skill {
+        text-align: left;
+    }
+}

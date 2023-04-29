@@ -4,7 +4,8 @@
   "description": "DistributesSys",
   "main": "index.js",
   "scripts": {
-    "sass": "node-sass -w scss/ -o css/ --recursive"
+    "sass": "node-sass -w scss/ -o css/ --recursive",
+    "build": "webpack"
   },
   "repository": {
     "type": "git",
@@ -17,6 +18,7 @@
   },
   "homepage": "https://github.com/ainoal/microservices_ecommerce#readme",
   "dependencies": {
+    "@babel/preset-env": "^7.21.5",
     "amqplib": "^0.10.3",
     "body-parser": "^1.20.2",
     "express": "^4.18.2",
@@ -25,6 +27,11 @@
     "graphql-yoga": "^3.9.1",
     "http": "^0.0.1-security",
     "node-fetch": "^2.6.9",
-    "node-sass": "^8.0.0"
+    "node-sass": "^8.0.0",
+    "webpack": "^5.0.0"
+  },
+  "devDependencies": {
+    "babel-loader": "^9.1.2",
+    "webpack-cli": "^5.0.2"
   }
 }
