@@ -20,14 +20,12 @@ class OrderManagementService {
         // Connect to the AMQP server and create a channel for publish-subscribe
         // communication
         this.connection = amqp.connect('amqp://localhost').then(connection => {
-            console.log("here");
             return connection.createChannel().then(channel => {
                 this.channel = channel;
                 const exchange = 'order_created';
                 return channel.assertExchange(exchange, 'fanout', { durable: false });
             });
         }).then(() => {
-            console.log("here2");
             return this;
         });
     }
@@ -44,18 +42,7 @@ class OrderManagementService {
         const order = new Order(orderID, cart, "Created");
         this.orders.push(order);
         const message = JSON.stringify(order);
-        return new Promise((resolve, reject) => {
-            console.log("here5");
-            this.channel.publish(exchange, '', Buffer.from(message), (error) => {
-            if (error) {
-                console.log("hereerror");
-                reject(error);
-            } else {
-                console.log("hereresolve");
-                resolve(order);
-            }
-            });
-        });
+        this.channel.publish(exchange, '', Buffer.from(message));
     }
 
     updateOrder(orderID, newStatus) {
@@ -111,13 +98,12 @@ app.get("/orders/:ID", (req, res) => {
     });
 }, 10000);*/
 
-console.log("here3");
 orderManagement.connection.then(() => {
-    console.log("here4");
     const cart1 = new Cart(1);
-    orderManagement.createOrder(cart1).then((order) => {
-        console.log(order);
-    });
+    let order = orderManagement.createOrder(cart1);
+    console.log(order);
+
+
 }).catch((err) => {
     console.error(err);
 });

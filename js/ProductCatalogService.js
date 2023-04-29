@@ -5,31 +5,9 @@ const bodyParser = require("body-parser");
 
 const Product = require("./Product");
 
-/*const GRAPHQL_URL = 'http://localhost:9000/';
-
-async function fetchGreeting() {
-	const response = await fetch(GRAPHQL_URL, {
-		method: 'POST',
-		headers: {
-			'content-type': 'application/json'
-		},
-		body: JSON.stringify({
-			query: `
-        query {
-          greeting
-        }
-      `
-		})
-	});
-
-	const { data } = await response.json();
-	return data;
-}
-
-fetchGreeting().then(({ greeting }) => {
-  const title = document.querySelector('h1');
-  title.textContent = greeting;
-});*/
+/*import express from "express";
+import bodyParser from "body-parser";
+import Product from "./Product";*/
 
 class ProductCatalogService {
     constructor() {
@@ -209,4 +187,5 @@ for (let i = 0; i < filteredList4.length; i++) {
 productCatalog.updateProduct("1", "best teddy bear", "-", "-", "-");
 let teddy = productCatalog.getProduct("1");
 console.log(`Pruduct name: ${teddy.name}`);
+
 
