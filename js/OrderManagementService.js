@@ -36,7 +36,7 @@ class OrderManagementService {
         return order ? order : null;
     }
 
-    createOrder(cart) {     // TODO: Also "owner" later when authorization service is implemented
+    createOrder(cart) {
         const orderID = this.orders.length + 1;
         const exchange = 'order_created';
         const order = new Order(orderID, cart, "Created");
@@ -62,7 +62,7 @@ class OrderManagementService {
 
 // RESTful API
 const app = express();
-const port = 8000;
+const port = 5000;
 
 // Parse incoming requests
 app.use(bodyParser.json());
@@ -76,6 +76,20 @@ app.get("/orders/:ID", (req, res) => {
     } else {
         res.status(404).send(JSON.stringify("Invalid order number"));
     }
+});
+
+// Create order
+app.put("/orders/:cart", (req, res) => {
+    orderManagement.createOrder(req.body.cart);
+    res.send("Order created");
+});
+
+// Update order
+app.put("/update/:data", (req, res) => {
+    const orderID = req.body.data[1];
+    const newStatus = req.body.data[2];
+    orderManagement.updateOrder(orderID, newStatus);
+    res.send("Order updated");
 });
 
   /* CHECKLIST:

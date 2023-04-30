@@ -12,6 +12,7 @@
 //const express = require("express");
 const fetch = require('node-fetch');
 const Product = require("./Product");
+const Order = require("./Order");
 
 class Cart {
     constructor(cartID) {
@@ -53,6 +54,10 @@ class ShoppingCartService {
         this.carts = [];
     }
 
+    getCart(ID) {
+        return this.carts.find((cart) => cart.cartID == ID);
+    }
+
     // Create a new shopping cart
     createCart(cartID) {
         const cart = new Cart(cartID);
@@ -92,9 +97,7 @@ class ShoppingCartService {
                 console.log(err);
                 reject();
             });
-            // TODO: ADD COMMUNICATION TO PRODUCT CATALOG SERVICE ???
         });
-
     }
 
     // Remove products from cart
@@ -118,6 +121,54 @@ class ShoppingCartService {
             return cost;
         }
     }
+
+    // Proceed to checkout
+    proceedToPay(cartID) {
+        // Get cost of the cart
+        const cart = this.carts.find((cart) => cart.cartID == cartID);
+        price = cart.getTotalCost();
+
+        // Call payment microservice API
+        return new Promise((resolve, reject) => {
+            fetch(`http://localhost:4000/checkout/${price}`)
+            .then(res => res.json())
+            .then(data => {
+                console.log(data);
+        
+                if (data == "Order failed") {
+                    console.log("There was a problem processing your order.");
+                } else {
+                    this.orderPlaced(cart);
+                }
+                resolve();
+            })
+            .catch(err => {
+                console.log(err);
+                reject();
+            });
+        });
+    }
+
+    // Inform order management microservice that order has been placed
+    orderPlaced(cart) {
+        return new Promise((resolve, reject) => {
+            fetch(`http://localhost:5000/orders/${cart}`)
+            .then(res => res.json())
+            .then(data => {
+                console.log(data);
+        
+                if (data == "Order created") {
+                    console.log("Order created and can be tracked");
+                }
+                resolve();
+            })
+            .catch(err => {
+                console.log(err);
+                reject();
+            });
+        });
+    }
+
 }
 
 /******************* TESTING *********************/
@@ -128,6 +179,7 @@ async function test() {
     await cartservice.addProductToCart("1", 2, testcart.cartID);
     await cartservice.addProductToCart("21", 2, testcart.cartID);
     const c = await cartservice.calculateTotalCostOfCart(testcart.cartID);
+
 }
 
 test();
