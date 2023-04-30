@@ -26,31 +26,18 @@ class PaymentService {
     // TODO: Possibly set up method checkout() that is responsible
     // for the whole checkout process
     checkout(price) {
-        let cardValid = this.validatePayment;
+        // Validate payment
+        /*let cardValid = this.validatePayment;
         if (cardValid != 0) {
+            console.log(cardValid);
             return -1;
         }
+        // Process payment
         let paymentSuccessful = this.processPayment(price);
         if (paymentSuccessful != 0) {
             return -1;
         }
-        return 0;
-    }
-
-    validatePayment() {
-        /* EXPLAIN HOW IT WOULD WORK IN A REAL APPLICATION */
-        return 0;
-    }
-
-    processPayment(price) {
-        
-        /*if (!order) {
-            throw new Error(`Order ${this.orderID} not found`);
-        }*/
-
-        // TODO: communicate with order management microservice to
-        // update order status. (paid/failed)
-
+        console.log("woop woop");*/
         return 0;
     }
 }

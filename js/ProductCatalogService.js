@@ -19,7 +19,6 @@ class ProductCatalogService {
     }
 
     getAllProducts() {
-        console.log("SUCCESS");
         return this.products;
     }
 
@@ -160,7 +159,7 @@ productCatalog.createProduct("453", "rhino", "toys", 6.9, 3);
 productCatalog.createProduct("21", "hat", "clothes", 2.01, 17);
 
 let product1 = productCatalog.getProduct("1");
-console.log(`Pruduct name: ${product1.name}`);
+console.log(`Product name: ${product1.name}`);
 
 let filteredList1 = productCatalog.filter("toys", 10);
 for (let i = 0; i < filteredList1.length; i++) {
@@ -186,6 +185,11 @@ for (let i = 0; i < filteredList4.length; i++) {
 
 productCatalog.updateProduct("1", "best teddy bear", "-", "-", "-");
 let teddy = productCatalog.getProduct("1");
-console.log(`Pruduct name: ${teddy.name}`);
+console.log(`Product name: ${teddy.name}`);
 
-
+// Show products
+products = productCatalog.getAllProducts();
+console.log("Products:");
+for (let i = 0; i < products.length; i++) {
+    console.log(products[i]);
+}

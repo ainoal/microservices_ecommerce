@@ -43,6 +43,7 @@ class OrderManagementService {
         this.orders.push(order);
         const message = JSON.stringify(order);
         this.channel.publish(exchange, '', Buffer.from(message));
+        return order;
     }
 
     updateOrder(orderID, newStatus) {
@@ -79,9 +80,10 @@ app.get("/orders/:ID", (req, res) => {
 });
 
 // Create order
-app.put("/orders/:cart", (req, res) => {
-    orderManagement.createOrder(req.body.cart);
-    res.send("Order created");
+app.get("/create/:cart", (req, res) => {
+    const order = orderManagement.createOrder(req.params.cart);
+    console.log(order);
+    res.send(JSON.stringify(`Order with ID ${order.orderID} created`));
 });
 
 // Update order
@@ -89,7 +91,7 @@ app.put("/update/:data", (req, res) => {
     const orderID = req.body.data[1];
     const newStatus = req.body.data[2];
     orderManagement.updateOrder(orderID, newStatus);
-    res.send("Order updated");
+    res.send(JSON.stringify("Order updated"));
 });
 
   /* CHECKLIST:
@@ -111,6 +113,15 @@ app.put("/update/:data", (req, res) => {
         console.log(order);
     });
 }, 10000);*/
+
+// Listen for incoming requests
+try {
+    app.listen(port, () => {
+        console.log(`Order management microservice listening on port ${port}`);
+    });
+} catch (error) {
+    console.error(`${error}`);
+}
 
 orderManagement.connection.then(() => {
     const cart1 = new Cart(1);

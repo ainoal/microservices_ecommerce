@@ -48,8 +48,9 @@ class Cart {
     }
 }
 
+// TODO: IF A CART NUMBER DOES NOT EXIST, ERROR HANDLING FOR OPERATIONS FOR THAT CART
+
 class ShoppingCartService {
-    // TODO: REMOVE TESTCART AND IMPLEMENT BETTER CART MANAGEMENT
     constructor() {
         this.carts = [];
     }
@@ -123,10 +124,9 @@ class ShoppingCartService {
     }
 
     // Proceed to checkout
-    proceedToPay(cartID) {
+    proceedToPay(cart) {
         // Get cost of the cart
-        const cart = this.carts.find((cart) => cart.cartID == cartID);
-        price = cart.getTotalCost();
+        const price = cart.getTotalCost();
 
         // Call payment microservice API
         return new Promise((resolve, reject) => {
@@ -138,6 +138,7 @@ class ShoppingCartService {
                 if (data == "Order failed") {
                     console.log("There was a problem processing your order.");
                 } else {
+                    console.log(cart);
                     this.orderPlaced(cart);
                 }
                 resolve();
@@ -152,7 +153,7 @@ class ShoppingCartService {
     // Inform order management microservice that order has been placed
     orderPlaced(cart) {
         return new Promise((resolve, reject) => {
-            fetch(`http://localhost:5000/orders/${cart}`)
+            fetch(`http://localhost:5000/create/${cart}`)
             .then(res => res.json())
             .then(data => {
                 console.log(data);
@@ -172,6 +173,7 @@ class ShoppingCartService {
 }
 
 /******************* TESTING *********************/
+// TODO: modify this to make it the shopping cart main function
 async function test() {
     const cartservice = new ShoppingCartService();
     let testcart = new Cart("1", []);
@@ -179,6 +181,9 @@ async function test() {
     await cartservice.addProductToCart("1", 2, testcart.cartID);
     await cartservice.addProductToCart("21", 2, testcart.cartID);
     const c = await cartservice.calculateTotalCostOfCart(testcart.cartID);
+    carttoprint = cartservice.getCart(testcart.cartID);
+    console.log(carttoprint);
+    await cartservice.proceedToPay(testcart);
 
 }
 
