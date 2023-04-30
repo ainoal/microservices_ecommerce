@@ -2,12 +2,7 @@
 */
 const express = require("express");
 const bodyParser = require("body-parser");
-
 const Product = require("./Product");
-
-/*import express from "express";
-import bodyParser from "body-parser";
-import Product from "./Product";*/
 
 class ProductCatalogService {
     constructor() {

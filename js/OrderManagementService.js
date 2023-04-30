@@ -1,12 +1,5 @@
-/**** FOR TESTING ******/
-class Cart {
-    constructor(cartID) {
-        this.cartID = cartID;
-        this.items = [];
-        this.quantityInCart = [];
-    }
-}
-/***********************/
+/*
+*/
 
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -14,11 +7,11 @@ const amqp = require('amqplib');
 const Order = require("./Order");
 
 class OrderManagementService {
-    constructor() {    // maybe also authorization?
+    constructor() {
         this.orders = [];
 
         // Connect to the AMQP server and create a channel for publish-subscribe
-        // communication
+        // communication. At the end not used for communication in this exercise.
         this.connection = amqp.connect('amqp://localhost').then(connection => {
             return connection.createChannel().then(channel => {
                 this.channel = channel;
@@ -94,26 +87,6 @@ app.put("/update/:data", (req, res) => {
     res.send(JSON.stringify("Order updated"));
 });
 
-  /* CHECKLIST:
-   * When Order management publishes a change in order (order placed)
-   * -> product catalog gets notification
-   * 
-   * When change in an order: order placed & successfull 
-   * -> payment service gets notified
-   * 
-   * When any change in an order
-   * -> auth service gets notified
-  */
-  
-  /************** FOR TESTING ********************/
-/*setTimeout(() => {
-    console.log('Waited 10 seconds');
-    const cart1 = new Cart(1);
-    orderManagement.createOrder(cart1).then((order) => {
-        console.log(order);
-    });
-}, 10000);*/
-
 // Listen for incoming requests
 try {
     app.listen(port, () => {
@@ -123,15 +96,6 @@ try {
     console.error(`${error}`);
 }
 
-orderManagement.connection.then(() => {
-    const cart1 = new Cart(1);
-    let order = orderManagement.createOrder(cart1);
-    console.log(order);
-
-
-}).catch((err) => {
-    console.error(err);
-});
   
 
 

@@ -5,9 +5,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const amqp = require("amqplib/callback_api");
-//const Order = require("./Order");
 const { spawnSync } = require('child_process');
-
 
 class PaymentInfo {
     constructor(name, cardNumber, expirationDate, cvv) {
@@ -24,33 +22,11 @@ class PaymentService {
         this.paymentInfo = paymentInfo;
     }
 
-    // TODO: Possibly set up method checkout() that is responsible
-    // for the whole checkout process
     async checkout(price) {
         return new Promise((resolve, reject) => {
-            const scriptToRun = "carddetails.js";
-            const result = spawnSync('cmd.exe', ['/k', 'start', 'cmd.exe', 'node', scriptToRun], { input: validity, stdio: ['pipe', 'pipe', 'inherit'] });
-            if (result.status !== 0) {
-                console.error(`Child process exited with code ${result.status}`);
-                process.exit(1);
-            }
-            const output = result.stdout.toString().trim();
-            console.log(`Child process output: ${output}`);
-            spawnSync('taskkill', ['/IM', 'cmd.exe', '/FI', 'Windowtitle'], { shell: true });
-            //console.log(`Child process output: ${output}`);
-            // Validate payment
-            /*let cardValid = this.validatePayment;
-            if (cardValid != 0) {
-                console.log(cardValid);
-                return -1;
-            }
-            
-            // Process payment
-            let paymentSuccessful = this.processPayment(price);
-            if (paymentSuccessful != 0) {
-                return -1;
-            }
-            console.log("woop woop");*/
+            const scriptToRun = "paymentdetails.js";
+            const child = spawnSync('cmd.exe', ['/c', 'start', '/wait', 'cmd.exe', '/c', 'node', scriptToRun], { stdio: ['pipe', '', 'inherit'] });
+
             resolve(0);
         });
     }

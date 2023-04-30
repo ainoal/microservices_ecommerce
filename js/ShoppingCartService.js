@@ -12,7 +12,19 @@
 //const express = require("express");
 const fetch = require('node-fetch');
 const Product = require("./Product");
-const Order = require("./Order");
+//const Order = require("./Order");
+const readline = require("readline").createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+/*function menu() {
+    console.log("\n");
+    console.log("1) Add product to cart");
+    console.log("2) Remove product from cart");
+    console.log("3) Get total cost of cart");
+}
+menu();*/
 
 class Cart {
     constructor(cartID) {
@@ -22,12 +34,18 @@ class Cart {
     }
 
     addItem(product, quantityToBuy) {
-        // TODO: CHECK WHETHER ITEM ALREADY IN CART, IF YES, THEN JUST INCREASE THE QUANTITY
-        this.items.push(product);
-        this.quantityInCart.push(quantityToBuy);
+        const productAlreadyInCart = this.items.findIndex((prod) => prod.productID == product.productID);
+        if (productAlreadyInCart !== -1) {
+            this.quantityInCart[productAlreadyInCart] += quantityToBuy;
+        } else {
+            this.items.push(product);
+            console.log(this.items);
+            this.quantityInCart.push(quantityToBuy);
+        }
     }
 
     removeItem(productID) {
+        console.log(this.items);
         const idx = this.items.findIndex((item) => item.productID == productID);
         if (idx > -1) {
             this.items.splice(idx, 1);
@@ -47,8 +65,6 @@ class Cart {
         return cost;
     }
 }
-
-// TODO: IF A CART NUMBER DOES NOT EXIST, ERROR HANDLING FOR OPERATIONS FOR THAT CART
 
 class ShoppingCartService {
     constructor() {
@@ -84,8 +100,6 @@ class ShoppingCartService {
                     console.log(`There are only ${data.quantity} pcs of that product available`);
                 } else {
                     // Add product to cart 
-                    // (TODO: IMPROVE THIS BY CHECKING IF PRODUCT ID ALREADY IN CART
-                    // AND HOW MANY OF IT WILL THEN BE IN THE CART)
                     const cart = this.carts.find((cart) => cart.cartID == cartID);
                     const product = new Product(data.productID, data.name, data.category, 
                         data.price, data.quantity);
@@ -172,11 +186,11 @@ class ShoppingCartService {
 
 }
 
-/******************* TESTING *********************/
-// TODO: modify this to make it the shopping cart main function
-async function test() {
-    const cartservice = new ShoppingCartService();
-    let testcart = new Cart("1", []);
+
+// For running the program on command line
+const cartservice = new ShoppingCartService();
+let testcart = new Cart("1", []);
+async function shopping() {
     cartservice.createCart(testcart.cartID);
     await cartservice.addProductToCart("1", 2, testcart.cartID);
     await cartservice.addProductToCart("21", 2, testcart.cartID);
@@ -187,4 +201,32 @@ async function test() {
 
 }
 
-test();
+shopping();
+
+async function waitForAction() {
+    const action = await new Promise((resolve) => {
+        readline.question("Choose an option:", (input) => {
+          resolve(parseInt(input));
+        });
+    });
+    if (action == 1) {
+        cartservice.addProductToCart("1", 2, testcart.cartID)
+        .then(() => {
+            waitForAction();
+        })
+        .catch(error => {
+            console.error(error);
+            waitForAction();
+        });
+    } else if (action == 2) {
+        cartservice.removeFromCart("1", testcart.cartID);
+    } else if (action == 3) {
+        c = cartservice.calculateTotalCostOfCart(testcart.cartID);
+    } else {
+        waitForAction();
+    }
+}
+
+setTimeout(() => {
+    waitForAction();
+}, 2000);
