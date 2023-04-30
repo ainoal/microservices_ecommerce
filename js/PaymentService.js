@@ -2,11 +2,12 @@
  * 
  */
 
-
 const express = require("express");
 const bodyParser = require("body-parser");
 const amqp = require("amqplib/callback_api");
 //const Order = require("./Order");
+const { spawnSync } = require('child_process');
+
 
 class PaymentInfo {
     constructor(name, cardNumber, expirationDate, cvv) {
@@ -25,21 +26,35 @@ class PaymentService {
 
     // TODO: Possibly set up method checkout() that is responsible
     // for the whole checkout process
-    checkout(price) {
-        // Validate payment
-        /*let cardValid = this.validatePayment;
-        if (cardValid != 0) {
-            console.log(cardValid);
-            return -1;
-        }
-        // Process payment
-        let paymentSuccessful = this.processPayment(price);
-        if (paymentSuccessful != 0) {
-            return -1;
-        }
-        console.log("woop woop");*/
-        return 0;
+    async checkout(price) {
+        return new Promise((resolve, reject) => {
+            const scriptToRun = "carddetails.js";
+            const result = spawnSync('cmd.exe', ['/k', 'start', 'cmd.exe', 'node', scriptToRun], { input: validity, stdio: ['pipe', 'pipe', 'inherit'] });
+            if (result.status !== 0) {
+                console.error(`Child process exited with code ${result.status}`);
+                process.exit(1);
+            }
+            const output = result.stdout.toString().trim();
+            console.log(`Child process output: ${output}`);
+            spawnSync('taskkill', ['/IM', 'cmd.exe', '/FI', 'Windowtitle'], { shell: true });
+            //console.log(`Child process output: ${output}`);
+            // Validate payment
+            /*let cardValid = this.validatePayment;
+            if (cardValid != 0) {
+                console.log(cardValid);
+                return -1;
+            }
+            
+            // Process payment
+            let paymentSuccessful = this.processPayment(price);
+            if (paymentSuccessful != 0) {
+                return -1;
+            }
+            console.log("woop woop");*/
+            resolve(0);
+        });
     }
+
 }
 
 // RESTful API
@@ -52,11 +67,11 @@ app.use(bodyParser.json());
 var paymentService= new PaymentService();
 
 // Pay for the products
-app.get("/checkout/:price", (req, res) => {
-    const order = paymentService.checkout(req.params.price);
-    if (order == 0) {
+app.get("/checkout/:price", async (req, res) => {
+    try {
+        const order = await paymentService.checkout(req.params.price);
         res.send((JSON.stringify("Order successful")));
-    } else {
+    } catch(error) {
         res.send(JSON.stringify("Order failed"));
     }
 });
