@@ -9,22 +9,12 @@
 
 // Async/await: https://javascript.info/async-await
 
-//const express = require("express");
 const fetch = require('node-fetch');
 const Product = require("./Product");
-//const Order = require("./Order");
 const readline = require("readline").createInterface({
     input: process.stdin,
     output: process.stdout
 });
-
-/*function menu() {
-    console.log("\n");
-    console.log("1) Add product to cart");
-    console.log("2) Remove product from cart");
-    console.log("3) Get total cost of cart");
-}
-menu();*/
 
 class Cart {
     constructor(cartID) {
@@ -210,7 +200,12 @@ async function waitForAction() {
         });
     });
     if (action == 1) {
-        cartservice.addProductToCart("1", 2, testcart.cartID)
+        const id = await new Promise((resolve) => {
+            readline.question("Product ID:", (input) => {
+                resolve(input);
+            });
+        });
+        cartservice.addProductToCart(id, 1, testcart.cartID)
         .then(() => {
             waitForAction();
         })
@@ -219,10 +214,18 @@ async function waitForAction() {
             waitForAction();
         });
     } else if (action == 2) {
-        cartservice.removeFromCart("1", testcart.cartID);
+        const id = await new Promise((resolve) => {
+            readline.question("Product ID:", (input) => {
+                resolve(input);
+            });
+        });
+        cartservice.removeFromCart(id, testcart.cartID);
+        waitForAction();
     } else if (action == 3) {
         c = cartservice.calculateTotalCostOfCart(testcart.cartID);
+        waitForAction();
     } else {
+        console.log("Invalid input");
         waitForAction();
     }
 }
